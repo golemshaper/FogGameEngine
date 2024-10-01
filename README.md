@@ -6,16 +6,13 @@ A simple game engine
 
 ### Features
 
- - $(Project Feature 01)
- - $(Project Feature 02)
- - $(Project Feature 03)
+ - None
 
 ### Controls
 
 Keyboard/Mouse:
- - $(project Control 01)
- - $(project Control 02)
- - $(project Control 03)
+ - WASD - Walk
+ - Space - Jump
 
 ### Screenshots
 
@@ -23,15 +20,11 @@ _TODO: Show your game to the world, animated GIFs recommended!._
 
 ### Developers
 
- - $(Developer 01) - $(Role/Tasks Developed)
- - $(Developer 02) - $(Role/Tasks Developed)
- - $(Developer 03) - $(Role/Tasks Developed)
+-BP@
 
 ### Links
 
- - YouTube Gameplay: $(YouTube Link)
- - itch.io Release: $(itch.io Game Page)
- - Steam Release: $(Steam Game Page)
+ -N/A
 
 ### License
 
