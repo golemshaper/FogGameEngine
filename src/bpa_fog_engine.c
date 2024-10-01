@@ -49,6 +49,16 @@ float jumpStrength = 4.2f;
 float jumpYPos=0.0f;
 float globalTimer=0.0f;
 float lastDelta=0.0f;
+//------------------------------------------------------
+//Models
+Model model;
+
+void InitModel() {
+    model = LoadModel("resources/models/AnotherDummy.obj");
+}
+void DrawModelsInScene() {
+    DrawModel(model, (Vector3){ 0.0f, 0.0f, 0.0f }, 1.0f, WHITE);
+}
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
@@ -60,6 +70,9 @@ static void UpdateDrawFrame(void);          // Update and draw one frame
 int main()
 {
     
+
+      
+      
     //cool examples: https://www.raylib.com/examples/core/loader.html?name=core_smooth_pixelperfect
     //https://ziggit.dev/t/how-to-get-the-screen-buffer-from-the-raylib-image-to-be-able-to-draw-pixels-and-push-it-to-the-window/5612/2
     
@@ -76,8 +89,12 @@ int main()
     camera.fovy = 60.0f;
     camera.projection = CAMERA_PERSPECTIVE;
     
+    //SETUP MODELS
+    //--------------------------------------------------------------------------------------
+    InitModel();
+
     
-    
+    //--------------------------------------------------------------------------------------
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
@@ -239,6 +256,7 @@ void GameUpdate()
      
         PlayerStuff();
         BulletLogic();
+        DrawModelsInScene();
         DrawGrid(20, 1.0f);
 }
 void GameUpdate2D()
@@ -265,6 +283,8 @@ static void UpdateDrawFrame(void)
     //GAME STUFF HERE:
     GameUpdate();
 
+    
+    
     EndMode3D();
     //2D Draw
     GameUpdate2D();
