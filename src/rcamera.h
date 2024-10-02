@@ -439,13 +439,15 @@ Matrix GetCameraProjectionMatrix(Camera *camera, float aspect)
 void UpdateCamera(Camera *camera, int mode)
 {
     Vector2 mousePositionDelta = GetMouseDelta();
-
+    
     bool moveInWorldPlane = ((mode == CAMERA_FIRST_PERSON) || (mode == CAMERA_THIRD_PERSON));
     bool rotateAroundTarget = ((mode == CAMERA_THIRD_PERSON) || (mode == CAMERA_ORBITAL));
     bool lockView = ((mode == CAMERA_FREE) || (mode == CAMERA_FIRST_PERSON) || (mode == CAMERA_THIRD_PERSON) || (mode == CAMERA_ORBITAL));
     bool rotateUp = false;
 
-    if (mode == CAMERA_CUSTOM) {}
+    if (mode == CAMERA_CUSTOM) {
+
+    }
     else if (mode == CAMERA_ORBITAL)
     {
         // Orbital can just orbit

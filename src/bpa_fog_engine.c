@@ -14,6 +14,21 @@
 //#include "rcamera.h"  //https://stackoverflow.com/questions/72161657/how-can-i-change-camera3d-movement-speed-in-raylib
 //TODO: Implement this: https://www.raylib.com/examples/core/loader.html?name=core_smooth_pixelperfect
 
+//----------------------------------------------------------------------------------
+//CAM STUFF
+#define RCAMERA_IMPLEMENTATION
+//LIGHTING STUFF
+#define RLIGHTS_IMPLEMENTATION
+#include "rlights.h"
+
+#if defined(PLATFORM_DESKTOP)
+    #define GLSL_VERSION            330
+#else   // PLATFORM_ANDROID, PLATFORM_WEB
+    #define GLSL_VERSION            100
+#endif
+//----------------------------------------------------------------------------------
+
+
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -53,15 +68,21 @@ float globalTimer=0.0f;
 float lastDelta=0.0f;
 
 //------------------------------------------------------
+
+Light lights[MAX_LIGHTS] = { 0 };
 //Models
 Model model;
-
+Shader shader;
 void InitModel() {
     model = LoadModel("resources/models/AnotherDummy.obj");
+    model.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = WHITE; // Set diffuse color to white
+    //Texture2D texture = LoadTexture("resources/models/testTexture.png"); // Load model texture
+    //model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;            // Set map diffuse texture
 }
 void DrawModelsInScene() {
    //SIMPLE//  DrawModel(model, (Vector3){ 0.0f, 0.0f, 0.0f }, 1.0f, WHITE);
    Vector3 pos={0.0f,0.0f,0.0f};
+   pos=playerPosition;
    Vector3 rotAxis={0.0f,1.0f,0.0f};
    float angle=globalTimer*200.0f;
    DrawModelEx(model, pos, rotAxis, angle, half, WHITE); 
@@ -100,6 +121,17 @@ int main()
     //--------------------------------------------------------------------------------------
     InitModel();
 
+    //LIGHTS
+    shader = LoadShader("resources/shaders/glsl330/lighting.vs", "resources/shaders/glsl330/lighting.fs");
+    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    int ambientLoc = GetShaderLocation(shader, "ambient");
+    SetShaderValue(shader, ambientLoc, (float[]){ 0.1f, 0.1f, 0.1f, 1.0f }, SHADER_UNIFORM_VEC4);
+    //--
+
+lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, -2 }, Vector3Zero(), YELLOW, shader);
+lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, 2 }, Vector3Zero(), RED, shader);
+lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, 2 }, Vector3Zero(), GREEN, shader);
+lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, shader);
     
     //--------------------------------------------------------------------------------------
 #if defined(PLATFORM_WEB)
@@ -140,7 +172,11 @@ static void PlayerStuff(void)
     forward = Vector3Normalize(forward); // Normalize the forward vector
     Vector3 up = { 0.0f, 1.0f, 0.0f }; // Assuming Y is up
     Vector3 right = Vector3CrossProduct(forward, up);
-
+    
+// Load basic lighting shader
+   /* Shader shader = LoadShader(TextFormat("resources/shaders/glsl%i/lighting.vs", GLSL_VERSION),
+                               TextFormat("resources/shaders/glsl%i/lighting.fs", GLSL_VERSION));
+     */                          
 
     //CONTROLS
     float horizontalAxis = 0.0f;
@@ -243,10 +279,20 @@ void BulletLogic()
 }
 void WeirdFX()
 {
+    //LINES AND STUFF
     Vector3 startPos = {0.0f,0.5f,0.0f};
      Vector3 startPos2 = {0.0f,1.5f,0.0f};
      DrawCapsule(startPos,playerPosition,0.02f,8,8,BLUE);
      DrawCapsule(startPos2,playerPosition,0.02f,8,8,BLUE);
+     
+     
+     //LIGHTING
+     for (int i = 0; i < MAX_LIGHTS; i++) {
+        if (lights[i].enabled) DrawSphereEx(lights[i].position, 0.2f, 8, 8, lights[i].color);
+        else DrawSphereWires(lights[i].position, 0.2f, 8, 8, ColorAlpha(lights[i].color, 0.3f));
+    }
+    
+    
 }
 bool CollisionCheck(Vector3 playerPosition,Vector3 enemyplayerPosition, Vector3 playerSize, Vector3 enemyBoxSize)
 {
@@ -268,11 +314,13 @@ bool CollisionCheck(Vector3 playerPosition,Vector3 enemyplayerPosition, Vector3 
 }
 void GameUpdate()
 {
-     
+    
         PlayerStuff();
         BulletLogic();
         DrawModelsInScene();
         WeirdFX();
+        
+        
         DrawGrid(20, 1.0f);
 }
 void GameUpdate2D()
@@ -286,12 +334,20 @@ static void UpdateDrawFrame(void)
 {
     // Update
     //----------------------------------------------------------------------------------
+    //UpdateCamera(&camera, CAMERA_THIRD_PERSON);
     UpdateCamera(&camera, CAMERA_THIRD_PERSON);
+    
     //----------------------------------------------------------------------------------
 
     // Draw
     //----------------------------------------------------------------------------------
+    for (int i = 0; i < MAX_LIGHTS; i++) UpdateLightValues(shader, lights[i]);
+    
     BeginDrawing();
+    
+        
+    //BeginShaderMode(shader); //remove me until lighting works...
+
 
     ClearBackground(LIGHTGRAY);
 
@@ -299,6 +355,9 @@ static void UpdateDrawFrame(void)
     //GAME STUFF HERE:
     GameUpdate();
 
+    
+      
+   // EndShaderMode();//remove me until lighting works...
     
     
     EndMode3D();
