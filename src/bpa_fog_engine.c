@@ -23,6 +23,8 @@
 // Local Variables Definition (local to this module)
 //----------------------------------------------------------------------------------
 Camera camera = { 0 };
+Vector3 one = {1.0f,1.0f,1.0f };
+Vector3 half = {0.5f,0.5f,0.5f};
 Vector3 cubePosition = { 0 };
 Vector3 cubeScale = { 0.5,0.5f,0.5f };
 Vector3 playerPosition ={0.0f,0.5f,0.0f};
@@ -44,11 +46,12 @@ Vector3 playerDirectionVector ={1.0f,0.0f,0.0f};
     };
     
 float floorPlaneYPos=0.5f;
-float gravity = 5.2f;
-float jumpStrength = 4.2f;
+float gravity = 15.2f;
+float jumpStrength = 7.2f;
 float jumpYPos=0.0f;
 float globalTimer=0.0f;
 float lastDelta=0.0f;
+
 //------------------------------------------------------
 //Models
 Model model;
@@ -57,7 +60,11 @@ void InitModel() {
     model = LoadModel("resources/models/AnotherDummy.obj");
 }
 void DrawModelsInScene() {
-    DrawModel(model, (Vector3){ 0.0f, 0.0f, 0.0f }, 1.0f, WHITE);
+   //SIMPLE//  DrawModel(model, (Vector3){ 0.0f, 0.0f, 0.0f }, 1.0f, WHITE);
+   Vector3 pos={0.0f,0.0f,0.0f};
+   Vector3 rotAxis={0.0f,1.0f,0.0f};
+   float angle=globalTimer*200.0f;
+   DrawModelEx(model, pos, rotAxis, angle, half, WHITE); 
 }
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
@@ -107,7 +114,8 @@ int main()
         UpdateDrawFrame();
     }
 #endif
-
+    //Unload models
+    UnloadModel(model);   
     // De-Initialization
     //--------------------------------------------------------------------------------------
     CloseWindow();                  // Close window and OpenGL context
@@ -205,7 +213,7 @@ static void PlayerStuff(void)
 void BulletLogic()
 {
     float deltaTime=GetFrameTime();
-    float speed = 5.6f;
+    float speed = 10.6f;
     float maxLife = 0.9f;
     for(int i=0; i< 3;++i)
     {
@@ -221,7 +229,7 @@ void BulletLogic()
         
          DrawSphere(bulletLocations[i],0.1f+sinVal, BLUE);
          // DrawLine3D(bulletLocations[i],playerPosition,RED);
-          DrawCapsule(bulletLocations[i],playerPosition,0.01f,8,8,GREEN);
+          DrawCapsule(bulletLocations[i],playerPosition,0.02f,8,8,GREEN);
         //LIFETIME COUNTER
         bulletLifetime[i]+=2*deltaTime;
         //TODO: REPOOL
@@ -232,6 +240,13 @@ void BulletLogic()
             bulletMoveVectors[i]=playerDirectionVector;
         }
     }
+}
+void WeirdFX()
+{
+    Vector3 startPos = {0.0f,0.5f,0.0f};
+     Vector3 startPos2 = {0.0f,1.5f,0.0f};
+     DrawCapsule(startPos,playerPosition,0.02f,8,8,BLUE);
+     DrawCapsule(startPos2,playerPosition,0.02f,8,8,BLUE);
 }
 bool CollisionCheck(Vector3 playerPosition,Vector3 enemyplayerPosition, Vector3 playerSize, Vector3 enemyBoxSize)
 {
@@ -257,6 +272,7 @@ void GameUpdate()
         PlayerStuff();
         BulletLogic();
         DrawModelsInScene();
+        WeirdFX();
         DrawGrid(20, 1.0f);
 }
 void GameUpdate2D()
