@@ -13,6 +13,7 @@
 #include "raymath.h"
 //#include "rcamera.h"  //https://stackoverflow.com/questions/72161657/how-can-i-change-camera3d-movement-speed-in-raylib
 //TODO: Implement this: https://www.raylib.com/examples/core/loader.html?name=core_smooth_pixelperfect
+//Draw models as overlay? https://github.com/raysan5/raylib/discussions/2373
 
 //----------------------------------------------------------------------------------
 //CAM STUFF
@@ -82,10 +83,15 @@ void InitModel() {
 void DrawModelsInScene() {
    //SIMPLE//  DrawModel(model, (Vector3){ 0.0f, 0.0f, 0.0f }, 1.0f, WHITE);
    Vector3 pos={0.0f,0.0f,0.0f};
-   pos=playerPosition;
+  // pos=playerPosition;
    Vector3 rotAxis={0.0f,1.0f,0.0f};
    float angle=globalTimer*200.0f;
+
    DrawModelEx(model, pos, rotAxis, angle, half, WHITE); 
+    //DRAW SHADOW MESH
+    Vector3 shadowOffset={0.055f,-0.015f,0.055f};
+    shadowOffset=Vector3Add(shadowOffset,pos);
+    DrawModelEx(model, shadowOffset, rotAxis, angle, half, BLACK); 
 }
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
@@ -244,7 +250,10 @@ static void PlayerStuff(void)
     float sinVal = sin(globalTimer*12)*0.02f;
     float cosVal = cos(globalTimer*12)*0.02f;
     DrawCube(playerPosition,cubeScale.x+sinVal,(cubeScale.y*2)+cosVal,cubeScale.z+sinVal, RED);
-  
+    //DRAW SHADOW MESH
+    Vector3 shadowOffset={0.01f,-0.01f,0.01f};
+    shadowOffset=Vector3Add(shadowOffset,playerPosition);
+    DrawCube(shadowOffset,cubeScale.x+sinVal,(cubeScale.y*2)+cosVal,cubeScale.z+sinVal, BLACK);
 }
 void BulletLogic()
 {
